@@ -9,7 +9,7 @@ android {
     defaultConfig {
         applicationId "com.example.project_prm"
         minSdk 23
-        targetSdk 32
+        targetSdk 33
         versionCode 1
         versionName "1.0"
 
@@ -29,6 +29,7 @@ android {
 }
 
 dependencies {
+    implementation 'com.gauravk.audiovisualizer:audiovisualizer:0.9.2'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.8.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
@@ -37,3 +38,4 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     implementation 'com.karumi:dexter:6.2.3'
 }
+
