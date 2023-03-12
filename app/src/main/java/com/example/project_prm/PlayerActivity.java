@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
+import android.graphics.PorterDuff;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import com.gauravk.audiovisualizer.visualizer.BarVisualizer;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Set;
 
 public class PlayerActivity extends AppCompatActivity {
     Button btnplay, btnnext, btnff, btnprev, btnfr;
@@ -31,6 +33,7 @@ public class PlayerActivity extends AppCompatActivity {
     static MediaPlayer mediaPlayer;
     int position;
     ArrayList<File> mySongs;
+    Thread updateseekbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +51,8 @@ public class PlayerActivity extends AppCompatActivity {
         visualizer = findViewById(R.id.blast);
         imageView = findViewById(R.id.imageview);
 
+
+
         if (mediaPlayer != null) {
             mediaPlayer.stop();
             mediaPlayer.release();
@@ -56,15 +61,39 @@ public class PlayerActivity extends AppCompatActivity {
         Intent i = getIntent();
         Bundle bundle = i.getExtras();
 
+        Set<String> keys = bundle.keySet();
+        for (String key : keys) {
+            System.out.println("KEY: " + key);
+        }
         mySongs = (ArrayList) bundle.getParcelableArrayList("songs");
         String songName = i.getStringExtra("songname");
         position = bundle.getInt("pos", 0);
         txtsname.setSelected(true);
+        System.out.println("SIZE" + mySongs);
         Uri uri = Uri.parse(mySongs.get(position).toString());
         sname = mySongs.get(position).getName();
         txtsname.setText(sname);
         mediaPlayer = MediaPlayer.create(getApplicationContext(), uri);
         mediaPlayer.start();
+
+        updateseekbar = new Thread() {
+            @Override
+            public void run() {
+                int totalDuration = mediaPlayer.getDuration();
+                int currentposition = 0;
+
+                while (currentposition < totalDuration) {
+                    try {
+                        sleep(500);
+                        currentposition = mediaPlayer.getCurrentPosition();
+                        seekmusic.setProgress(currentposition);
+                    } catch (InterruptedException | IllegalStateException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+
         btnplay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -79,12 +108,36 @@ public class PlayerActivity extends AppCompatActivity {
             }
         });
 
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+                btnnext.performClick();
+            }
+        });
+
         btnnext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mediaPlayer.stop();
                 mediaPlayer.release();
                 position = ((position + 1) % mySongs.size());
+                Uri u = Uri.parse(mySongs.get(position).toString());
+                mediaPlayer = MediaPlayer.create(getApplicationContext(), u);
+                sname = mySongs.get(position).getName();
+                txtsname.setText(sname);
+                mediaPlayer.start();
+                btnplay.setBackgroundResource(R.drawable.ic_pause);
+                startAnimation(imageView);
+            }
+        });
+
+        btnprev.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mediaPlayer.stop();
+                mediaPlayer.release();
+                position = (position - 1) < 0 ? (mySongs.size() - 1) : (position - 1);
+
                 Uri u = Uri.parse(mySongs.get(position).toString());
                 mediaPlayer = MediaPlayer.create(getApplicationContext(), u);
                 sname = mySongs.get(position).getName();
