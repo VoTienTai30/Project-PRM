@@ -2,12 +2,15 @@ package com.example.project_prm;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -17,16 +20,18 @@ import java.io.File;
 import java.util.ArrayList;
 
 public class PlayerActivity extends AppCompatActivity {
-    Button btnplay,btnnext,btnff,btnprev,btnfr;
-    TextView txtsname,txtsstart,txtsstop;
+    Button btnplay, btnnext, btnff, btnprev, btnfr;
+    TextView txtsname, txtsstart, txtsstop;
     SeekBar seekmusic;
     BarVisualizer visualizer;
+    ImageView imageView;
 
     String sname;
     public static final String EXTRA_NAME = "song_name";
     static MediaPlayer mediaPlayer;
     int position;
     ArrayList<File> mySongs;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,8 +46,9 @@ public class PlayerActivity extends AppCompatActivity {
         txtsstop = findViewById(R.id.txtsstop);
         seekmusic = findViewById(R.id.seekbar);
         visualizer = findViewById(R.id.blast);
+        imageView = findViewById(R.id.imageview);
 
-        if(mediaPlayer != null){
+        if (mediaPlayer != null) {
             mediaPlayer.stop();
             mediaPlayer.release();
         }
@@ -52,25 +58,49 @@ public class PlayerActivity extends AppCompatActivity {
 
         mySongs = (ArrayList) bundle.getParcelableArrayList("songs");
         String songName = i.getStringExtra("songname");
-        position = bundle.getInt("pos",0);
+        position = bundle.getInt("pos", 0);
         txtsname.setSelected(true);
         Uri uri = Uri.parse(mySongs.get(position).toString());
         sname = mySongs.get(position).getName();
         txtsname.setText(sname);
-        mediaPlayer = MediaPlayer.create(getApplicationContext(),uri);
+        mediaPlayer = MediaPlayer.create(getApplicationContext(), uri);
         mediaPlayer.start();
-        btnplay.setOnClickListener(new View.OnClickListener(){
+        btnplay.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view){
-                if(mediaPlayer.isPlaying()){
+            public void onClick(View view) {
+                if (mediaPlayer.isPlaying()) {
                     btnplay.setBackgroundResource(R.drawable.ic_play);
                     mediaPlayer.pause();
-                }else{
+                } else {
 
                     btnplay.setBackgroundResource(R.drawable.ic_pause);
                     mediaPlayer.start();
                 }
             }
         });
+
+        btnnext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mediaPlayer.stop();
+                mediaPlayer.release();
+                position = ((position + 1) % mySongs.size());
+                Uri u = Uri.parse(mySongs.get(position).toString());
+                mediaPlayer = MediaPlayer.create(getApplicationContext(), u);
+                sname = mySongs.get(position).getName();
+                txtsname.setText(sname);
+                mediaPlayer.start();
+                btnplay.setBackgroundResource(R.drawable.ic_pause);
+                startAnimation(imageView);
+            }
+        });
+    }
+
+    public void startAnimation(View view) {
+        ObjectAnimator animator = ObjectAnimator.ofFloat(imageView, "rotation", 0f, 360f);
+        animator.setDuration(1000);
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(animator);
+        animatorSet.start();
     }
 }
