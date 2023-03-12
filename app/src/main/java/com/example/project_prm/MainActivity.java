@@ -26,6 +26,7 @@ import com.karumi.dexter.listener.single.PermissionListener;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -86,9 +87,6 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < mySongs.size(); i++) {
             items[i] = mySongs.get(i).getName().toString().replace(".mp3", "").replace(".wav", "");
         }
-        /*ArrayAdapter<String> myAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items) ;
-        listView.setAdapter(myAdapter);*/
-
         customAdapter customAdapter = new customAdapter();
         listView.setAdapter(customAdapter);
 
@@ -97,8 +95,8 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 String songName = (String) listView.getItemAtPosition(i);
                 startActivity(new Intent(getApplicationContext(), PlayerActivity.class)
-                        .putExtra("mySongs", mySongs)
-                        .putExtra("songName", songName)
+                        .putExtra("songs", mySongs)
+                        .putExtra("songname", songName)
                         .putExtra("pos", i));
             }
         });
