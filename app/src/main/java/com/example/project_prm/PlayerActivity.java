@@ -9,6 +9,7 @@ import android.graphics.PorterDuff;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -39,6 +40,11 @@ public class PlayerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
+
+        getSupportActionBar().setTitle("Now Playing");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         btnprev = findViewById(R.id.btnprev);
         btnplay = findViewById(R.id.playbtn);
         btnnext = findViewById(R.id.btnnext);
@@ -115,6 +121,24 @@ public class PlayerActivity extends AppCompatActivity {
             }
         });
 
+        String endTime = createTime(mediaPlayer.getDuration());
+        txtsstop.setText(endTime);
+
+        final Handler handler = new Handler();
+        final int delay = 1000;
+
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                String currentTime = createTime(mediaPlayer.getCurrentPosition());
+                txtsstart.setText(currentTime);
+                handler.postDelayed(this, delay);
+            }
+        }, delay);
+
+
+
+
         btnplay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -136,6 +160,13 @@ public class PlayerActivity extends AppCompatActivity {
             }
         });
 
+        int audiosessionId = mediaPlayer.getAudioSessionId();
+        if (audiosessionId != -1)
+        {
+            visualizer.setAudioSessionId(audiosessionId);
+        }
+
+
         btnnext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -149,6 +180,12 @@ public class PlayerActivity extends AppCompatActivity {
                 mediaPlayer.start();
                 btnplay.setBackgroundResource(R.drawable.ic_pause);
                 startAnimation(imageView);
+
+                int audiosessionId = mediaPlayer.getAudioSessionId();
+                if (audiosessionId != -1)
+                {
+                    visualizer.setAudioSessionId(audiosessionId);
+                }
             }
         });
 
@@ -166,9 +203,36 @@ public class PlayerActivity extends AppCompatActivity {
                 mediaPlayer.start();
                 btnplay.setBackgroundResource(R.drawable.ic_pause);
                 startAnimation(imageView);
+
+                int audiosessionId = mediaPlayer.getAudioSessionId();
+                if (audiosessionId != -1)
+                {
+                    visualizer.setAudioSessionId(audiosessionId);
+                }
+            }
+        });
+
+        btnff.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mediaPlayer.isPlaying())
+                {
+                    mediaPlayer.seekTo(mediaPlayer.getCurrentPosition()+10000);
+                }
+            }
+        });
+
+        btnfr.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mediaPlayer.isPlaying())
+                {
+                    mediaPlayer.seekTo(mediaPlayer.getCurrentPosition()-10000);
+                }
             }
         });
     }
+
 
     public void startAnimation(View view) {
         ObjectAnimator animator = ObjectAnimator.ofFloat(imageView, "rotation", 0f, 360f);
