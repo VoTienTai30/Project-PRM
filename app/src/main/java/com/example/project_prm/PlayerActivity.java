@@ -93,6 +93,27 @@ public class PlayerActivity extends AppCompatActivity {
                 }
             }
         };
+        seekmusic.setMax(mediaPlayer.getDuration());
+        updateseekbar.start();
+        seekmusic.getProgressDrawable().setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.MULTIPLY);
+        seekmusic.getThumb().setColorFilter(getResources().getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_IN);
+
+        seekmusic.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                mediaPlayer.seekTo(seekBar.getProgress());
+            }
+        });
 
         btnplay.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -155,5 +176,18 @@ public class PlayerActivity extends AppCompatActivity {
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(animator);
         animatorSet.start();
+    }
+
+    public String createTime(int duration){
+        String time = "";
+        int min = duration/1000/60;
+        int sec = duration/1000%60;
+
+        time+= min+":";
+        if(sec<10){
+            time+="0";
+        }
+        time+=sec;
+        return time;
     }
 }
